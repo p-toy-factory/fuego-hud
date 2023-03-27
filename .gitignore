@@ -1,0 +1,4 @@
+dist/*
+!dist/index.user.js
+!dist/index.user.js.LICENSE.txt
+node_modules
