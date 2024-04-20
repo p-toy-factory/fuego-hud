@@ -1,31 +1,18 @@
-import { Observable } from "rxjs";
-
-function getCurrentSecond() {
-  return Math.floor(performance.now() / 1000);
-}
+import { Observable, animationFrames } from "rxjs";
 
 export const fps$ = new Observable<number>((subscriber) => {
   let fps = 0;
-  let lastSecond = 0;
-  let rafId: number | null = null;
+  let prevSecond = 0;
 
-  function callback() {
-    const now = getCurrentSecond();
-    // TODO: May prev - now >= 2
-    if (now > lastSecond) {
+  const subscription = animationFrames().subscribe(({ timestamp }) => {
+    const now = Math.floor(timestamp / 1000);
+    for (let i = 0; i < now - prevSecond; i++) {
       subscriber.next(fps);
       fps = 0;
-      lastSecond = now;
+      prevSecond = now;
     }
     fps++;
-    requestAnimationFrame(callback);
-  }
+  });
 
-  lastSecond = getCurrentSecond();
-  rafId = requestAnimationFrame(callback);
-
-  return function cleanup() {
-    cancelAnimationFrame(rafId as number);
-    rafId = null;
-  };
+  return () => subscription.unsubscribe();
 });
