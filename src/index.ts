@@ -1,8 +1,9 @@
-import { bufferTime, distinctUntilChanged, filter, map } from "rxjs";
-import { graph } from "./components/graph";
+import { createFuegoGraphElement } from "./components/graph";
 import { fps$ } from "./rx/observables/fps";
 import { frametime$ } from "./rx/observables/frametime";
 import { keepLast } from "./rx/operators/keep-last";
+import { createFpsTextElement } from "./components/fps-text";
+import { createFrametimeTextElement } from "./components/frametime-text";
 
 export function runFuegoHud() {
   const hudContainer = document.createElement("div");
@@ -19,57 +20,43 @@ export function runFuegoHud() {
     ].join("; ")
   );
 
-  const fpsText = document.createElement("div");
-  const fpsSubscription = fps$.pipe(distinctUntilChanged()).subscribe((fps) => {
-    fpsText.textContent = `Framerate: ${fps}fps`;
-  });
-
   const graphWidth = 60 * 3;
   const seed = new Array(graphWidth).fill(0);
 
   const fpss$ = fps$.pipe(keepLast(graphWidth, seed));
-  const { el: fpsGraph, cleanup: cleanupFpsGraph } = graph({
+  const fpsGraph = createFuegoGraphElement({
     data$: fpss$,
     height: 60,
     width: graphWidth,
   });
 
-  const frametimeText = document.createElement("div");
-  const frametimeSubscription = frametime$
-    .pipe(
-      bufferTime(1000),
-      filter((arr) => arr.length > 0),
-      map((arr) =>
-        // TODO: cur may lt 1000
-        (arr.reduce((acc, cur) => acc + cur, 0) / arr.length).toFixed(1)
-      ),
-      distinctUntilChanged()
-    )
-    .subscribe((frametime) => {
-      frametimeText.textContent = `Frametime: ${frametime}ms`;
-    });
-
   const frametimes$ = frametime$.pipe(keepLast(graphWidth, seed));
-  const { el: frametimeGraph, cleanup: cleanupFrametimeGraph } = graph({
+  const frametimeGraph = createFuegoGraphElement({
     data$: frametimes$,
     height: 50,
     width: graphWidth,
   });
 
-  const container = document.body;
-  container.appendChild(hudContainer);
-  hudContainer.appendChild(fpsText);
-  hudContainer.appendChild(fpsGraph);
-  hudContainer.appendChild(frametimeText);
-  hudContainer.appendChild(frametimeGraph);
+  const fpsTextEl = createFpsTextElement();
+  const frametimeTextEl = createFrametimeTextElement();
+
+  append(document.body, [
+    append(hudContainer, [
+      fpsTextEl,
+      fpsGraph,
+      frametimeTextEl,
+      frametimeGraph,
+    ]),
+  ]);
 
   return function closeFuegoHud() {
-    fpsSubscription.unsubscribe();
-    cleanupFpsGraph();
-    frametimeSubscription.unsubscribe();
-    cleanupFrametimeGraph();
     hudContainer.remove();
   };
+}
+
+function append(node: HTMLElement, children: HTMLElement[]) {
+  node.append(...children);
+  return node;
 }
 
 runFuegoHud();

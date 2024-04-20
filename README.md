@@ -1,6 +1,6 @@
 # FuegoHud
 
-An overlay for monitoring FPS and Frametime, similar to MSI Afterburner or MangoHud.
+An overlay for monitoring FPS and Frametime on browser, similar to [MangoHud](https://github.com/flightlessmango/MangoHud) and MSI Afterburner (RivaTuner).
 
 ## Installation
 
