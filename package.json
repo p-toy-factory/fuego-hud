@@ -1,6 +1,6 @@
 {
   "name": "fuego-hud",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An overlay for monitoring FPS and Frametime on browser.",
   "main": "index.js",
   "scripts": {
