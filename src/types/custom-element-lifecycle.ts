@@ -1,13 +1,13 @@
 export interface ICustomElementLifecycle {
-  connectedCallback?: () => void;
+	connectedCallback?: () => void;
 
-  disconnectedCallback?: () => void;
+	disconnectedCallback?: () => void;
 
-  adoptedCallback?: () => void;
+	adoptedCallback?: () => void;
 
-  attributeChangedCallback?: (
-    name: string,
-    oldValue: string,
-    newValue: string
-  ) => void;
+	attributeChangedCallback?: (
+		name: string,
+		oldValue: string,
+		newValue: string,
+	) => void;
 }

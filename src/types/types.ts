@@ -1,4 +1,5 @@
 export interface Constructor<T> {
-  new (...args: any[]): T;
-  prototype: T;
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	new (...args: any[]): T;
+	prototype: T;
 }

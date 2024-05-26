@@ -6,51 +6,51 @@ import { defineComponent } from "./define-component";
 const frametimePerSecond$ = frametime$.pipe(bufferTime(1000));
 
 const createAvgFrametimeText = defineComponent(
-  "avg-frametime",
-  ({ onCleanup }) => {
-    const el = document.createElement("span");
+	"avg-frametime",
+	({ onCleanup }) => {
+		const el = document.createElement("span");
 
-    const frametimeAvgPerSecond$ = frametimePerSecond$.pipe(
-      map((arr) =>
-        (arr.reduce((acc, cur) => acc + cur, 0) / (arr.length || 1)).toFixed(1)
-      ),
-      distinctUntilChanged()
-    );
+		const frametimeAvgPerSecond$ = frametimePerSecond$.pipe(
+			map((arr) =>
+				(arr.reduce((acc, cur) => acc + cur, 0) / (arr.length || 1)).toFixed(1),
+			),
+			distinctUntilChanged(),
+		);
 
-    const avgSubscription = frametimeAvgPerSecond$.subscribe((avgFrametime) => {
-      el.innerHTML = `Frametime: <sub>avg</sub>${avgFrametime}`;
-    });
+		const avgSubscription = frametimeAvgPerSecond$.subscribe((avgFrametime) => {
+			el.innerHTML = `Frametime: <sub>avg</sub>${avgFrametime}`;
+		});
 
-    onCleanup(() => avgSubscription.unsubscribe());
+		onCleanup(() => avgSubscription.unsubscribe());
 
-    return el;
-  }
+		return el;
+	},
 );
 
 const createMaxFrametimeText = defineComponent(
-  "max-frametime",
-  ({ onCleanup }) => {
-    const el = document.createElement("span");
+	"max-frametime",
+	({ onCleanup }) => {
+		const el = document.createElement("span");
 
-    const frametimeMaxPerSecond$ = frametimePerSecond$.pipe(
-      map((arr) => arr.reduce((acc, cur) => Math.max(acc, cur), 0).toFixed(1)),
-      distinctUntilChanged()
-    );
+		const frametimeMaxPerSecond$ = frametimePerSecond$.pipe(
+			map((arr) => arr.reduce((acc, cur) => Math.max(acc, cur), 0).toFixed(1)),
+			distinctUntilChanged(),
+		);
 
-    const maxSubscription = frametimeMaxPerSecond$.subscribe((maxFrametime) => {
-      el.innerHTML = `<sub>max</sub>${maxFrametime} ms`;
-    });
+		const maxSubscription = frametimeMaxPerSecond$.subscribe((maxFrametime) => {
+			el.innerHTML = `<sub>max</sub>${maxFrametime} ms`;
+		});
 
-    onCleanup(() => maxSubscription.unsubscribe());
+		onCleanup(() => maxSubscription.unsubscribe());
 
-    return el;
-  }
+		return el;
+	},
 );
 
 export function createFrametimeTextElement() {
-  return append(document.createElement("div"), [
-    createAvgFrametimeText(),
-    document.createTextNode(" / "),
-    createMaxFrametimeText(),
-  ]);
+	return append(document.createElement("div"), [
+		createAvgFrametimeText(),
+		document.createTextNode(" / "),
+		createMaxFrametimeText(),
+	]);
 }
