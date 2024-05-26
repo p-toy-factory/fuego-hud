@@ -1,14 +1,14 @@
 import { bufferTime, distinctUntilChanged, map } from "rxjs";
 import { frametime$ } from "../rx/observables/frametime";
 import { append } from "../utils/append";
-import { FuegoElement, registerFuegoElement } from "./fuego-element";
+import { defineComponent } from "./define-component";
 
-class FrametimeTextElement extends FuegoElement {
-  protected override connectedCallbackWithProps(): Node {
-    const frametimePerSecond$ = frametime$.pipe(bufferTime(1000));
+const frametimePerSecond$ = frametime$.pipe(bufferTime(1000));
 
-    // #region Average frametime per second
-    const avg = document.createElement("span");
+const createAvgFrametimeText = defineComponent(
+  "avg-frametime",
+  ({ onCleanup }) => {
+    const el = document.createElement("span");
 
     const frametimeAvgPerSecond$ = frametimePerSecond$.pipe(
       map((arr) =>
@@ -18,14 +18,19 @@ class FrametimeTextElement extends FuegoElement {
     );
 
     const avgSubscription = frametimeAvgPerSecond$.subscribe((avgFrametime) => {
-      avg.innerHTML = `Frametime: <sub>avg</sub>${avgFrametime}`;
+      el.innerHTML = `Frametime: <sub>avg</sub>${avgFrametime}`;
     });
 
-    this.onCleanup(() => avgSubscription.unsubscribe());
-    // #endregion
+    onCleanup(() => avgSubscription.unsubscribe());
 
-    // #region Max frametime per second
-    const max = document.createElement("span");
+    return el;
+  }
+);
+
+const createMaxFrametimeText = defineComponent(
+  "max-frametime",
+  ({ onCleanup }) => {
+    const el = document.createElement("span");
 
     const frametimeMaxPerSecond$ = frametimePerSecond$.pipe(
       map((arr) => arr.reduce((acc, cur) => Math.max(acc, cur), 0).toFixed(1)),
@@ -33,22 +38,19 @@ class FrametimeTextElement extends FuegoElement {
     );
 
     const maxSubscription = frametimeMaxPerSecond$.subscribe((maxFrametime) => {
-      max.innerHTML = `<sub>max</sub>${maxFrametime} ms`;
+      el.innerHTML = `<sub>max</sub>${maxFrametime} ms`;
     });
 
-    this.onCleanup(() => maxSubscription.unsubscribe());
-    // #endregion
+    onCleanup(() => maxSubscription.unsubscribe());
 
-    return append(document.createElement("div"), [
-      avg,
-      document.createTextNode(" / "),
-      max,
-    ]);
+    return el;
   }
-}
+);
 
-export const createFrametimeTextElement =
-  registerFuegoElement<FrametimeTextElement>(
-    "fuego-frametime-text",
-    FrametimeTextElement
-  );
+export function createFrametimeTextElement() {
+  return append(document.createElement("div"), [
+    createAvgFrametimeText(),
+    document.createTextNode(" / "),
+    createMaxFrametimeText(),
+  ]);
+}

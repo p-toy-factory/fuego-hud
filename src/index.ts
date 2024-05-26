@@ -7,9 +7,9 @@ import { createFrametimeTextElement } from "./components/frametime-text";
 import { append } from "./utils/append";
 
 export function runFuegoHud() {
-  const hudContainer = document.createElement("div");
-  hudContainer.id = "fuego-hud";
-  hudContainer.setAttribute(
+  const container = document.createElement("div");
+  container.id = "fuego-hud";
+  container.setAttribute(
     "style",
     [
       "position: fixed",
@@ -39,19 +39,14 @@ export function runFuegoHud() {
   });
 
   const fpsTextEl = createFpsTextElement();
-  const frametimeTextEl = createFrametimeTextElement({});
+  const frametimeTextEl = createFrametimeTextElement();
 
   append(document.body, [
-    append(hudContainer, [
-      fpsTextEl,
-      fpsGraph,
-      frametimeTextEl,
-      frametimeGraph,
-    ]),
+    append(container, [fpsTextEl, fpsGraph, frametimeTextEl, frametimeGraph]),
   ]);
 
   return function closeFuegoHud() {
-    hudContainer.remove();
+    container.remove();
   };
 }
 

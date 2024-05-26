@@ -1,6 +1,5 @@
 import type { Observable } from "rxjs";
-import { FuegoElement } from "./fuego-element";
-import { registerFuegoElement } from "./fuego-element";
+import { defineComponent } from "./define-component";
 
 export interface IFuegoGraphElementProps {
   data$: Observable<number[]>;
@@ -8,18 +7,16 @@ export interface IFuegoGraphElementProps {
   width: number;
 }
 
-export class FuegoGraphElement extends FuegoElement<IFuegoGraphElementProps> {
-  protected override connectedCallbackWithProps({
-    data$,
-    height,
-    width,
-  }: IFuegoGraphElementProps): Node {
+export const createFuegoGraphElement = defineComponent<IFuegoGraphElementProps>(
+  "reactive-element",
+  ({ props: { data$, height, width }, onCleanup }) => {
     const canvas = document.createElement("canvas");
     canvas.height = height;
     canvas.width = width;
 
     const ctx = canvas.getContext("2d")!;
-    const subscription = data$.subscribe((values) => {
+
+    const subscription = data$.subscribe((values: number[]) => {
       ctx.clearRect(0, 0, width, height);
       ctx.beginPath();
       ctx.moveTo(0, height - values[0]);
@@ -31,12 +28,8 @@ export class FuegoGraphElement extends FuegoElement<IFuegoGraphElementProps> {
       ctx.stroke();
     });
 
-    this.onCleanup(() => subscription.unsubscribe());
+    onCleanup(() => subscription.unsubscribe());
+
     return canvas;
   }
-}
-
-export const createFuegoGraphElement = registerFuegoElement<
-  FuegoGraphElement,
-  IFuegoGraphElementProps
->("fuego-graph", FuegoGraphElement);
+);

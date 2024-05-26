@@ -1,14 +1,15 @@
 import { distinctUntilChanged } from "rxjs";
-import { createReactiveElement } from "./reactive-element";
 import { fps$ } from "../rx/observables/fps";
+import { defineComponent } from "./define-component";
 
-export function createFpsTextElement() {
-  const fpsTextEl = createReactiveElement(
-    "div",
-    fps$.pipe(distinctUntilChanged()),
-    (el, fps) => {
+export const createFpsTextElement = defineComponent(
+  "fps-text",
+  ({ onCleanup }) => {
+    const el = document.createElement("div");
+    const subscription = fps$.pipe(distinctUntilChanged()).subscribe((fps) => {
       el.textContent = `Framerate: ${fps}fps`;
-    }
-  );
-  return fpsTextEl;
-}
+    });
+    onCleanup(() => subscription.unsubscribe());
+    return el;
+  }
+);

@@ -1,22 +1,18 @@
 import { CleanupsManager } from "../utils/cleanups-manager";
 import type { ICustomElementLifecycle } from "../types/custom-element-lifecycle";
-import type { Constructor } from "../types/types";
 
-export abstract class FuegoElement<TProps = {}>
+abstract class BaseFuegoComponent<TProps = undefined>
   extends HTMLElement
   implements ICustomElementLifecycle
 {
   private readonly cleanupsManager = new CleanupsManager();
-  public props?: TProps;
+  public props!: TProps;
 
   protected onCleanup(cleanup: () => void) {
     this.cleanupsManager.add(cleanup);
   }
 
   public connectedCallback() {
-    if (!this.props) {
-      throw new TypeError(`${this.nodeName}'s props is required`);
-    }
     const shadow = this.attachShadow({ mode: "open" });
     const node = this.connectedCallbackWithProps(this.props);
     shadow.append(node);
@@ -29,20 +25,33 @@ export abstract class FuegoElement<TProps = {}>
   }
 }
 
-export function registerFuegoElement<
-  TFuegoElement extends FuegoElement<TProps>,
-  TProps = {}
->(
+export function defineComponent<TProps = undefined>(
   name: string,
-  ctor: Constructor<TFuegoElement>
-): (props: TProps) => TFuegoElement {
-  customElements.define(name, ctor);
+  render: (ctx: {
+    props: TProps;
+    onCleanup: (cleanup: () => void) => void;
+  }) => Node
+): TProps extends undefined
+  ? () => BaseFuegoComponent
+  : (props: TProps) => BaseFuegoComponent {
+  class FuegoComponent extends BaseFuegoComponent<TProps> {
+    connectedCallbackWithProps(props: TProps) {
+      return render({
+        props,
+        onCleanup: this.onCleanup.bind(this),
+      });
+    }
+  }
+
+  const nameWithPrefix = `fuego-${name}`;
+  customElements.define(nameWithPrefix, FuegoComponent);
 
   function createFuegoElement(props: TProps) {
-    const el = document.createElement(name) as TFuegoElement;
+    const el = document.createElement(nameWithPrefix) as FuegoComponent;
     el.props = props;
     return el;
   }
 
+  // @ts-expect-error Can not be inferred
   return createFuegoElement;
 }
