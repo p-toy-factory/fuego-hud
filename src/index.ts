@@ -4,6 +4,7 @@ import { frametime$ } from "./rx/observables/frametime";
 import { keepLast } from "./rx/operators/keep-last";
 import { createFpsTextElement } from "./components/fps-text";
 import { createFrametimeTextElement } from "./components/frametime-text";
+import { append } from "./utils/append";
 
 export function runFuegoHud() {
   const hudContainer = document.createElement("div");
@@ -38,7 +39,7 @@ export function runFuegoHud() {
   });
 
   const fpsTextEl = createFpsTextElement();
-  const frametimeTextEl = createFrametimeTextElement();
+  const frametimeTextEl = createFrametimeTextElement({});
 
   append(document.body, [
     append(hudContainer, [
@@ -52,11 +53,6 @@ export function runFuegoHud() {
   return function closeFuegoHud() {
     hudContainer.remove();
   };
-}
-
-function append(node: HTMLElement, children: HTMLElement[]) {
-  node.append(...children);
-  return node;
 }
 
 runFuegoHud();

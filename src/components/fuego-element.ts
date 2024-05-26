@@ -2,7 +2,7 @@ import { CleanupsManager } from "../utils/cleanups-manager";
 import type { ICustomElementLifecycle } from "../types/custom-element-lifecycle";
 import type { Constructor } from "../types/types";
 
-export abstract class FuegoElement<TProps>
+export abstract class FuegoElement<TProps = {}>
   extends HTMLElement
   implements ICustomElementLifecycle
 {
@@ -31,7 +31,7 @@ export abstract class FuegoElement<TProps>
 
 export function registerFuegoElement<
   TFuegoElement extends FuegoElement<TProps>,
-  TProps
+  TProps = {}
 >(
   name: string,
   ctor: Constructor<TFuegoElement>
